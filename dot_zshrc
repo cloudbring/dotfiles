@@ -1,0 +1,198 @@
+# Zsh Configuration
+# =================
+
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Brew completions
+[ -f ~/.config/zsh/completions/brew.sh ] && source ~/.config/zsh/completions/brew.sh
+
+# Editor
+export EDITOR='nvim'
+
+# Aliases (includes ll, cat, ls replacements with exa/bat/zoxide)
+source ~/.config/zsh/aliases.sh
+
+# API Keys
+[ -f ~/.config/zsh/apikeys.sh ] && source ~/.config/zsh/apikeys.sh
+
+# FZF
+[ -f ~/.config/zsh/fzf.zsh ] && source ~/.config/zsh/fzf.zsh
+
+# iTerm2 Shell Integration
+[ -f ~/.config/zsh/iterm2.zsh ] && source ~/.config/zsh/iterm2.zsh
+
+# 1Password completions
+[ -f ~/.config/zsh/completions/1password.sh ] && source ~/.config/zsh/completions/1password.sh
+
+# Lazy-loaded NVM (loads on first use)
+export NVM_DIR="$HOME/.nvm"
+nvm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  nvm "$@"
+}
+node() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  node "$@"
+}
+npm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  npm "$@"
+}
+npx() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  npx "$@"
+}
+
+# Lazy-loaded pyenv (loads on first use)
+export PYENV_ROOT="$HOME/.pyenv"
+pyenv() {
+  unset -f pyenv python pip pip3 python3
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  pyenv "$@"
+}
+python() {
+  unset -f pyenv python pip pip3 python3
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  python "$@"
+}
+pip() {
+  unset -f pyenv python pip pip3 python3
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  pip "$@"
+}
+python3() {
+  unset -f pyenv python pip pip3 python3
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  python3 "$@"
+}
+pip3() {
+  unset -f pyenv python pip pip3 python3
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv virtualenv-init -)"
+  pip3 "$@"
+}
+
+# Lazy-loaded SDKMAN (loads on first use)
+sdk() {
+  unset -f sdk java gradle mvn
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+  sdk "$@"
+}
+java() {
+  unset -f sdk java gradle mvn
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+  java "$@"
+}
+gradle() {
+  unset -f sdk java gradle mvn
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+  gradle "$@"
+}
+mvn() {
+  unset -f sdk java gradle mvn
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+  mvn "$@"
+}
+
+# Lazy-loaded openclaw completion
+_openclaw_lazy_load() {
+  unset -f _openclaw_lazy_load
+  if command -v openclaw &>/dev/null; then
+    eval "$(openclaw completion zsh)"
+  fi
+}
+compdef _openclaw_lazy_load openclaw
+
+# Direnv
+if command -v direnv &>/dev/null; then
+  eval "$(direnv hook zsh)"
+fi
+
+# Bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# Go
+export GOPATH="$HOME/go"
+export GOROOT="$(brew --prefix go)/libexec"
+export PATH="$PATH:$GOPATH/bin"
+export PATH="$PATH:$GOROOT/bin"
+
+# Starship prompt
+eval "$(starship init zsh)"
+
+# LLVM for onnx
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+
+# icu4c for Python
+export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
+export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c/lib/pkgconfig"
+
+# Local bin
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+
+# Antigravity
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+
+# Luarocks
+[ -d "$HOME/.luarocks/bin" ] && export PATH="$HOME/.luarocks/bin:$PATH"
+
+# Lazyman (nvim selector)
+[ -f ~/.config/nvim-Lazyman/.lazymanrc ] && source ~/.config/nvim-Lazyman/.lazymanrc
+[ -f ~/.config/nvim-Lazyman/.nvimsbind ] && source ~/.config/nvim-Lazyman/.nvimsbind
+
+# Functions directory
+for f in ~/.config/zsh/functions/*.zsh ~/.config/zsh/functions/*.sh; do
+  [ -f "$f" ] && source "$f"
+done
+
+# Timeout function
+timeout() {
+  local duration=$1
+  shift
+  "$@" &
+  local pid=$!
+  ( sleep "$duration" && kill "$pid" 2>/dev/null ) &
+  wait "$pid" 2>/dev/null
+}
+
+# Reup alias
+alias reup="source ~/.zshrc"
+
+# History settings
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
