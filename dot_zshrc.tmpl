@@ -1,17 +1,48 @@
 # Zsh Configuration
 # =================
 
+# OS Detection
+is_macos() { [[ "$(uname)" == "Darwin" ]] }
+is_linux() { [[ "$(uname)" == "Linux" ]] }
+
+{{- if eq .chezmoi.os "darwin" }}
+# Homebrew settings (macOS only)
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
 # Homebrew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Brew completions
 [ -f ~/.config/zsh/completions/brew.sh ] && source ~/.config/zsh/completions/brew.sh
 
+# 1Password completions
+[ -f ~/.config/zsh/completions/1password.sh ] && source ~/.config/zsh/completions/1password.sh
+
+# LLVM for onnx
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+
+# icu4c for Python
+export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
+export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c/lib/pkgconfig"
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+# Linux-specific paths
+if [ -d /home/linuxbrew/.linuxbrew ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{- end }}
+
 # Editor
 export EDITOR='nvim'
 
 # Aliases (includes ll, cat, ls replacements with exa/bat/zoxide)
-source ~/.config/zsh/aliases.sh
+[ -f ~/.config/zsh/aliases.sh ] && source ~/.config/zsh/aliases.sh
 
 # API Keys
 [ -f ~/.config/zsh/apikeys.sh ] && source ~/.config/zsh/apikeys.sh
@@ -19,11 +50,8 @@ source ~/.config/zsh/aliases.sh
 # FZF
 [ -f ~/.config/zsh/fzf.zsh ] && source ~/.config/zsh/fzf.zsh
 
-# iTerm2 Shell Integration
+# iTerm2 Shell Integration (macOS only)
 [ -f ~/.config/zsh/iterm2.zsh ] && source ~/.config/zsh/iterm2.zsh
-
-# 1Password completions
-[ -f ~/.config/zsh/completions/1password.sh ] && source ~/.config/zsh/completions/1password.sh
 
 # Lazy-loaded NVM (loads on first use)
 export NVM_DIR="$HOME/.nvm"
@@ -112,15 +140,6 @@ mvn() {
   mvn "$@"
 }
 
-# Lazy-loaded openclaw completion
-_openclaw_lazy_load() {
-  unset -f _openclaw_lazy_load
-  if command -v openclaw &>/dev/null; then
-    eval "$(openclaw completion zsh)"
-  fi
-}
-compdef _openclaw_lazy_load openclaw
-
 # Direnv
 if command -v direnv &>/dev/null; then
   eval "$(direnv hook zsh)"
@@ -132,7 +151,12 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # pnpm
+{{- if eq .chezmoi.os "darwin" }}
 export PNPM_HOME="$HOME/Library/pnpm"
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
+export PNPM_HOME="$HOME/.local/share/pnpm"
+{{- end }}
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -140,22 +164,17 @@ esac
 
 # Go
 export GOPATH="$HOME/go"
+{{- if eq .chezmoi.os "darwin" }}
 export GOROOT="$(brew --prefix go)/libexec"
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
+export GOROOT="/usr/local/go"
+{{- end }}
 export PATH="$PATH:$GOPATH/bin"
 export PATH="$PATH:$GOROOT/bin"
 
 # Starship prompt
 eval "$(starship init zsh)"
-
-# LLVM for onnx
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-
-# icu4c for Python
-export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
-export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c/lib/pkgconfig"
 
 # Local bin
 export PATH="$HOME/.local/bin:$PATH"
