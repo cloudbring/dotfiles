@@ -1,0 +1,25 @@
+# Setup fzf
+# ---------
+{{- if eq .chezmoi.os "darwin" }}
+if [[ ! "$PATH" == */opt/homebrew/opt/fzf/bin* ]]; then
+  PATH="${PATH:+${PATH}:}/opt/homebrew/opt/fzf/bin"
+fi
+
+# Auto-completion
+[[ $- == *i* ]] && source "/opt/homebrew/opt/fzf/shell/completion.zsh" 2> /dev/null
+
+# Key bindings
+source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
+# Linux fzf - usually installed via package manager
+if command -v fzf &>/dev/null; then
+  for fzf_path in /usr/share/fzf /usr/local/share/fzf; do
+    if [ -d "$fzf_path" ]; then
+      [[ $- == *i* ]] && source "$fzf_path/completion.zsh" 2>/dev/null
+      source "$fzf_path/key-bindings.zsh" 2>/dev/null
+      break
+    fi
+  done
+fi
+{{- end }}
