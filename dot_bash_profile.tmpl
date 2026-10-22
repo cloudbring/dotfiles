@@ -1,0 +1,43 @@
+# ~/.bash_profile — login shells (terminal tabs on macOS, `bash -l`, agents).
+# Environment only: anything a script or an LLM agent needs goes here.
+# Interactive niceties live in ~/.bashrc.
+
+{{- if eq .chezmoi.os "darwin" }}
+
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv bash)"
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+# Silence macOS "default interactive shell is now zsh" notice
+export BASH_SILENCE_DEPRECATION_WARNING=1
+export PNPM_HOME="$HOME/Library/pnpm"
+{{- else }}
+
+# Homebrew on Linux, if present
+[[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+{{- end }}
+
+export EDITOR=nvim
+export VISUAL=nvim
+export PAGER=less
+export LESS='-R -F -i'   # keep colors, quit if one screen, smart-case search
+
+# PATH (later entries win)
+export GOPATH="$HOME/go"
+export BUN_INSTALL="$HOME/.bun"
+for d in "$GOPATH/bin" "$HOME/.luarocks/bin" "$PNPM_HOME" "$BUN_INSTALL/bin" "$HOME/bin" "$HOME/.local/bin"; do
+  [[ -d $d && ":$PATH:" != *":$d:"* ]] && PATH="$d:$PATH"
+done
+export PATH
+
+# mise shims: runtimes (node, python, …) for non-interactive shells and agents.
+# ~/.bashrc swaps this for full `mise activate` in interactive shells.
+command -v mise >/dev/null && eval "$(mise activate bash --shims)"
+
+# Secrets (rendered by chezmoi from 1Password; absent if disabled)
+[[ -r ~/.config/bash/apikeys.sh ]] && . ~/.config/bash/apikeys.sh
+
+[[ -r ~/.bashrc ]] && . ~/.bashrc

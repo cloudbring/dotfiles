@@ -1,0 +1,6 @@
+README.md
+bootstrap.sh
+changelog/
+{{- if ne .chezmoi.os "darwin" }}
+.hushlogin
+{{- end }}

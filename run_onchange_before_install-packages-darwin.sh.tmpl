@@ -1,0 +1,37 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# Re-runs whenever this package list changes.
+set -euo pipefail
+
+brew bundle --file=/dev/stdin <<BREWFILE
+# Shell
+brew "bash"
+brew "bash-completion@2"
+brew "starship"
+brew "chezmoi"
+
+# Runtimes and environments
+brew "mise"
+brew "direnv"
+brew "uv"
+brew "go"
+
+# Better CLI tools
+brew "eza"
+brew "bat"
+brew "fd"
+brew "ripgrep"
+brew "fzf"
+brew "zoxide"
+brew "git-delta"
+brew "vivid"
+brew "neovim"
+brew "git-lfs"
+
+cask "1password-cli"
+cask "font-jetbrains-mono-nerd-font"
+BREWFILE
+
+# Register Homebrew bash as an allowed login shell (needs sudo once)
+grep -qx /opt/homebrew/bin/bash /etc/shells || echo "Run: echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells && chsh -s /opt/homebrew/bin/bash"
+{{ end -}}

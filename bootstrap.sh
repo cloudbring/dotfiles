@@ -40,14 +40,14 @@ install_deps_macos() {
 		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	fi
 
-	brew install git zsh nvim starship eza bat zoxide fzf direnv
-	brew install --cask 1password-cli 2>/dev/null || brew install 1password-cli
+		# Everything else comes from chezmoi's run_onchange_before_install-packages-darwin.sh
+	brew install chezmoi
 }
 
 install_deps_debian() {
 	log "Installing apt packages..."
 	sudo apt-get update
-	sudo apt-get install -y git zsh curl wget build-essential
+	sudo apt-get install -y git bash bash-completion curl wget build-essential
 
 	# Install newer neovim from appimage or ppa
 	if ! command -v nvim &>/dev/null || [[ "$(nvim --version | head -1)" < "v0.10" ]]; then
@@ -100,7 +100,7 @@ install_deps_debian() {
 
 install_deps_fedora() {
 	log "Installing dnf packages..."
-	sudo dnf install -y git zsh curl wget neovim starship fzf direnv bat
+	sudo dnf install -y git bash bash-completion curl wget neovim starship fzf direnv bat bash-completion
 	# eza
 	sudo dnf copr enable -y atim/eza
 	sudo dnf install -y eza
@@ -110,7 +110,7 @@ install_deps_fedora() {
 
 install_deps_arch() {
 	log "Installing pacman packages..."
-	sudo pacman -S --noconfirm git zsh curl wget neovim starship eza bat zoxide fzf direnv
+	sudo pacman -S --noconfirm git bash bash-completion curl wget neovim starship eza bat zoxide fzf direnv
 }
 
 install_deps() {
@@ -152,10 +152,13 @@ apply_dotfiles() {
 }
 
 change_shell() {
-	if [[ "$SHELL" != *"zsh" ]]; then
-		log "Changing default shell to zsh..."
-		sudo chsh -s "$(which zsh)" "$USER" 2>/dev/null || true
-	fi
+	local bash_path
+	bash_path=/opt/homebrew/bin/bash
+	[[ -x $bash_path ]] || bash_path="$(command -v bash)"
+	[[ "$SHELL" == "$bash_path" ]] && return
+	log "Changing default shell to $bash_path (asks for your password)..."
+	grep -qx "$bash_path" /etc/shells || echo "$bash_path" | sudo tee -a /etc/shells >/dev/null
+	chsh -s "$bash_path"
 }
 
 main() {
@@ -167,7 +170,7 @@ main() {
 	apply_dotfiles
 	change_shell
 
-	log "Bootstrap complete! Restart your shell or run: exec zsh"
+	log "Bootstrap complete! Restart your shell or run: exec bash -l"
 }
 
 main "$@"

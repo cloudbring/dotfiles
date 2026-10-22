@@ -1,15 +1,30 @@
 [user]
 	email = emmanuelm@gmail.com
 	name = Emmanuel Mwangi
+[github]
+	user = cloudbring
 [init]
 	defaultBranch = master
+[core]
+	autocrlf = false
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+[merge]
+	conflictStyle = zdiff3
+[diff]
+	colorMoved = default
+[push]
+	autoSetupRemote = true
+[pull]
+	rebase = true
+[rerere]
+	enabled = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[push]
-	autoSetupRemote = true
-[core]
-	editor = cursor --wait
-	autocrlf = false

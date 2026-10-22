@@ -1,0 +1,7 @@
+# Global runtime versions. Projects override with mise.toml, .nvmrc,
+# .node-version, .python-version or .tool-versions.
+[tools]
+node = "lts"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node", "python"]

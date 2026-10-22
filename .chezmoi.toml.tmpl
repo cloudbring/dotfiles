@@ -1,0 +1,3 @@
+{{- $onepassword := promptBoolOnce . "onepassword" "Fetch API keys from 1Password (needs `op signin`)" false -}}
+[data]
+    onepassword = {{ $onepassword }}

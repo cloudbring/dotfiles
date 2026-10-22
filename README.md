@@ -1,64 +1,64 @@
 # Dotfiles
 
-Managed by [chezmoi](https://www.chezmoi.io/).
+Bash setup for macOS and Linux, managed by [chezmoi](https://www.chezmoi.io/).
 
-## Structure
+## Layout
 
 ```
-~/.local/share/chezmoi/
-├── README.md                # This file
-├── changelog/               # Detailed change log
-│   └── 2025-02-15-setup.md
-├── dot_zshrc                # ~/.zshrc
-├── dot_zprofile             # ~/.zprofile
-├── dot_zlogin               # ~/.zlogin
-├── dot_gitconfig            # ~/.gitconfig
-└── dot_config/
-    ├── starship.toml        # Prompt configuration
-    └── zsh/
-        ├── aliases.sh       # Shell aliases (eza, bat, zoxide)
-        ├── apikeys.sh.tmpl  # API keys (1Password template)
-        ├── completions/     # Shell completions
-        ├── functions/       # Custom functions
-        ├── fzf.zsh          # FZF configuration
-        └── iterm2.zsh       # iTerm2 integration
+.chezmoi.toml.tmpl                              # asks once: use 1Password for API keys?
+run_onchange_before_install-packages-darwin.sh.tmpl  # Brewfile; re-runs when the list changes
+bootstrap.sh                                    # fresh machine: deps, chezmoi, chsh to bash
+dot_bash_profile.tmpl   → ~/.bash_profile       # environment: PATH, Homebrew, mise shims
+dot_bashrc              → ~/.bashrc             # interactive: history, shopts, loads ~/.config/bash/*.sh
+dot_config/bash/
+  10-colors.sh          # LS_COLORS (vivid), bat man pages, grep/gcc/python colors
+  20-tools.sh           # completions, mise, direnv, fzf, zoxide, starship
+  30-aliases.sh
+  40-functions.sh
+  private_apikeys.sh.tmpl                       # 1Password → ~/.config/bash/apikeys.sh (0600)
+dot_config/mise/config.toml                     # global runtime versions (node LTS)
+dot_config/starship.toml                        # prompt
+dot_config/nvim/                                # LazyVim
+dot_gitconfig                                   # delta pager, zdiff3, rebase on pull
 ```
 
-## Key Features
+## Agent-friendly by design
 
-- **Lazy-loaded tools**: NVM, pyenv, SDKMAN load on first use (~1s startup)
-- **1Password integration**: API keys stored securely, fetched via chezmoi templates
-- **Modern replacements**: `eza` (ls), `bat` (cat), `zoxide` (cd)
+LLM agents (Claude Code, Codex, Cursor, …) run commands through bash. Shells
+where `AI_AGENT`, `CLAUDECODE`, `CODEX_SANDBOX`, `CURSOR_AGENT` or `GEMINI_CLI`
+is set, `TERM=dumb`, or stdout is not a terminal get the same PATH and runtimes
+as you, but none of the replacements: `cat`, `ls` and `cd` are the real commands
+and there is no starship prompt.
 
-## Commands
+## Runtimes
+
+[mise](https://mise.jdx.dev) replaces nvm, pyenv and SDKMAN. It reads `.nvmrc`,
+`.node-version`, `.python-version`, `.tool-versions` and `mise.toml`.
+Interactive shells use `mise activate`; login and agent shells use mise shims.
+Python projects use `uv`.
+
+## New machine
 
 ```bash
-# Edit a dotfile
-chezmoi edit ~/.zshrc
-
-# Apply changes
-chezmoi apply
-
-# Check what changed
-chezmoi diff
-
-# Add a new file
-chezmoi add ~/.newconfig
-
-# Update from repo
-chezmoi update
+curl -fsSL https://raw.githubusercontent.com/cloudbring/dotfiles/master/bootstrap.sh | bash
 ```
 
-## Setup on New Machine
+or, with Homebrew already installed:
 
-1. Install chezmoi: `brew install chezmoi`
-2. Install 1Password CLI: `brew install op`
-3. Authenticate: `op signin`
-4. Initialize: `chezmoi init --apply https://github.com/YOUR_USERNAME/dotfiles.git`
+```bash
+brew install chezmoi
+chezmoi init --apply cloudbring/dotfiles
+echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells && chsh -s /opt/homebrew/bin/bash
+```
 
-## Secrets
+For API keys, install the 1Password CLI, run `op signin`, then
+`chezmoi init --promptBool onepassword=true --apply`.
 
-API keys are stored in 1Password and fetched via chezmoi templates:
-- OpenAI keys: `OpenAI` item in Personal vault
-- OpenRouter: `OpenRouter` item in Personal vault
-- Z.ai: `Z.ai` item in Personal vault
+## Daily use
+
+```bash
+chezmoi edit --apply ~/.bashrc   # or the `bashrc` alias
+chezmoi diff                     # what would change
+chezmoi update                   # pull and apply
+reup                             # reload the current shell
+```
