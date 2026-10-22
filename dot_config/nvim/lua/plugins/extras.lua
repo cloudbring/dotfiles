@@ -57,7 +57,7 @@ return {
       "nvim-telescope/telescope.nvim",
     },
     opts = {
-      api_key_cmd = "op read op://Personal/OpenAI/api-key --no-newline",
+      api_key_cmd = "op read op://Personal/OpenAI/beo3jwowjawdstjcaxygqn4f3y --no-newline", -- OpenAI › "vim-chatgpt"
       yank_register = "+",
       edit_with_instructions = {
         diff = false,

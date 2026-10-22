@@ -2,6 +2,6 @@
 # 1Password and are referenced as op://vault/item/field.
 
 [git]
-    # Public half of the "Git SSH key" item in 1Password (authentication + signing).
-    # Empty until the key exists; signing turns on automatically once set.
-    signingkey = ""
+    # Public half of the "Git SSH key" item in 1Password (Personal vault),
+    # used for GitHub authentication and commit signing.
+    signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA3uwhU0+QtZPOLInLlryfspbCAvtcN9DNs/Esqp9xcT"

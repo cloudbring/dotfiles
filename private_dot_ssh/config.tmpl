@@ -4,8 +4,12 @@
 Include ~/.colima/ssh_config
 {{- end }}
 
+# Pin GitHub to the "Git SSH key" item. The .pub file tells the 1Password
+# agent which key to offer; the private key never leaves 1Password.
 Host github.com
     User git
+    IdentityFile ~/.ssh/git_ssh_key.pub
+    IdentitiesOnly yes
 
 Host *
 {{- if eq .chezmoi.os "darwin" }}
