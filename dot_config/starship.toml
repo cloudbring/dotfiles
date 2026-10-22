@@ -1,7 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 add_newline = false
-command_timeout = 1000
+command_timeout = 300   # never let a slow module hold up the prompt
 
 [character]
 success_symbol = '[➜](bold green)'
@@ -10,12 +10,37 @@ error_symbol = '[➜](bold red)'
 [cmd_duration]
 min_time = 2_000
 
-# Runtime versions show automatically in projects that use them
-# (node, bun, python, go, rust, java, …), each in its own color.
+# Runtime modules show in projects that use them, each in its own color.
+# Versions only where reading them is cheap (python ~7 ms, go ~3 ms).
+# Others must start the runtime to get a version (node ~50 ms, bun ~19 ms
+# per prompt), so they show just the icon. Prompt budget: ~10 ms.
 [nodejs]
-format = 'via [$symbol($version )]($style)'
-[python]
-format = 'via [${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+disabled = true   # runs `node` every prompt even without $version (engines check)
+[custom.node]
+detect_files = ['package.json', '.nvmrc', '.node-version']
+detect_extensions = ['mjs', 'cjs', 'mts', 'cts']
+symbol = ' '
+style = 'bold green'
+format = 'via [$symbol]($style)'
+[bun]
+format = 'via [$symbol]($style)'
+[java]
+format = 'via [$symbol]($style)'
+[rust]
+format = 'via [$symbol]($style)'
+[ruby]
+format = 'via [$symbol]($style)'
+[deno]
+format = 'via [$symbol]($style)'
+[kotlin]
+format = 'via [$symbol]($style)'
+[dotnet]
+format = 'via [$symbol]($style)'
 
+# Cloud context modules read config files on every prompt; off by default.
 [gcloud]
 disabled = true   # was showing the tandembrain account
+[aws]
+disabled = true
+[azure]
+disabled = true

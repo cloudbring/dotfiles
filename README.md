@@ -30,11 +30,34 @@ is set, `TERM=dumb`, or stdout is not a terminal get the same PATH and runtimes
 as you, but none of the replacements: `cat`, `ls` and `cd` are the real commands
 and there is no starship prompt.
 
+## Speed
+
+Measured on an M-series Mac (bare `bash -i` is ~6 ms):
+
+| | time |
+|---|---|
+| New terminal (interactive login shell) | ~26 ms |
+| Agent command (`bash -lc …`) | ~7 ms |
+| Prompt redraw, git + node project | ~15 ms |
+
+How:
+
+- `.bash_profile` starts no processes: `brew shellenv` and mise's shim PATH are inlined.
+- Each `tool init` (fzf, zoxide, starship, vivid) is cached in `~/.cache/bash/`
+  and regenerated when the tool or Homebrew changes. `reshell` clears it.
+- Homebrew's ~35 bash completions load on first <Tab>, not at startup (saves ~40 ms).
+- No per-prompt hooks that start processes: mise uses shims instead of
+  `mise activate`, direnv only runs after `cd`, and starship's command timer
+  uses `$EPOCHREALTIME` instead of running `starship time` twice per command.
+- starship shows versions only where they're cheap; node and bun show an icon,
+  because asking `node` for its version costs ~50 ms per prompt.
+
 ## Runtimes
 
 [mise](https://mise.jdx.dev) replaces nvm, pyenv and SDKMAN. It reads `.nvmrc`,
-`.node-version`, `.python-version`, `.tool-versions` and `mise.toml`.
-Interactive shells use `mise activate`; login and agent shells use mise shims.
+`.node-version`, `.python-version`, `.tool-versions` and `mise.toml`, and works
+through shims, so it costs nothing per prompt and agents get the same versions.
+`mise [env]` variables are not loaded into the shell; use direnv for those.
 Python projects use `uv`.
 
 ## New machine

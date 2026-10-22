@@ -1,11 +1,28 @@
 # ~/.bashrc — interactive shells only.
 
 [[ $- == *i* ]] || return
+# macOS /bin/bash is 3.2; everything below assumes bash 5.
+(( BASH_VERSINFO[0] >= 5 )) || return
 
 # Agent shells (Claude Code, Codex, Cursor, …) get plain, predictable behavior:
 # no aliased cat/cd/ls, no fancy prompt. Humans get the full setup.
 is_agent_shell() {
   [[ -n ${AI_AGENT-}${CLAUDECODE-}${CODEX_SANDBOX-}${CODEX_MANAGED_BY_NPM-}${CURSOR_AGENT-}${GEMINI_CLI-} || ${TERM-} == dumb || ! -t 1 ]]
+}
+
+# cached_source NAME TOOL CMD…  — source CMD's output, cached in ~/.cache/bash/NAME.sh.
+# Regenerated when TOOL's binary or anything in Homebrew changes; `reshell` clears it.
+# Saves one subprocess per tool per shell start.
+BASH_CACHE=${XDG_CACHE_HOME:-$HOME/.cache}/bash
+cached_source() {
+  local f=$BASH_CACHE/$1.sh tool=$2
+  shift 2
+  hash "$tool" 2>/dev/null || return 0
+  if [[ ! -s $f || ${BASH_CMDS[$tool]} -nt $f || ${HOMEBREW_PREFIX:-/nonexistent}/bin -nt $f ]]; then
+    mkdir -p "$BASH_CACHE"
+    "$@" >"$f.tmp" 2>/dev/null && mv -f "$f.tmp" "$f" || { rm -f "$f.tmp"; return 0; }
+  fi
+  . "$f"
 }
 
 # History
@@ -18,8 +35,7 @@ PROMPT_COMMAND="history -a${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 shopt -s checkwinsize globstar autocd cdspell dirspell
 
-for f in ~/.config/bash/*.sh; do
-  [[ $f == */apikeys.sh ]] && continue
+for f in ~/.config/bash/[0-9]*.sh; do
   [[ -r $f ]] && . "$f"
 done
 unset f

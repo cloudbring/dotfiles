@@ -1,11 +1,18 @@
 # ~/.bash_profile — login shells (terminal tabs on macOS, `bash -l`, agents).
 # Environment only: anything a script or an LLM agent needs goes here.
 # Interactive niceties live in ~/.bashrc.
+#
+# Speed rule: no subprocesses here. Tool output that never changes
+# (`brew shellenv`, `mise activate --shims`) is written out inline.
 
 {{- if eq .chezmoi.os "darwin" }}
 
-# Homebrew
-eval "$(/opt/homebrew/bin/brew shellenv bash)"
+# Homebrew (inlined `brew shellenv bash`)
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}"
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
 export HOMEBREW_AUTO_UPDATE_SECS=86400
 export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
@@ -15,8 +22,12 @@ export BASH_SILENCE_DEPRECATION_WARNING=1
 export PNPM_HOME="$HOME/Library/pnpm"
 {{- else }}
 
-# Homebrew on Linux, if present
-[[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
+if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+  export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+  export HOMEBREW_CELLAR=$HOMEBREW_PREFIX/Cellar
+  export HOMEBREW_REPOSITORY=$HOMEBREW_PREFIX/Homebrew
+  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin${PATH+:$PATH}"
+fi
 export PNPM_HOME="$HOME/.local/share/pnpm"
 {{- end }}
 
@@ -25,17 +36,16 @@ export VISUAL=nvim
 export PAGER=less
 export LESS='-R -F -i'   # keep colors, quit if one screen, smart-case search
 
-# PATH (later entries win)
+# PATH (later entries win). mise shims put node, python, … on PATH for every
+# shell, interactive or not, with no per-prompt hook.
 export GOPATH="$HOME/go"
 export BUN_INSTALL="$HOME/.bun"
-for d in "$GOPATH/bin" "$HOME/.luarocks/bin" "$PNPM_HOME" "$BUN_INSTALL/bin" "$HOME/bin" "$HOME/.local/bin"; do
+for d in "$GOPATH/bin" "$HOME/.luarocks/bin" "$PNPM_HOME" "$BUN_INSTALL/bin" \
+         "${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims" "$HOME/bin" "$HOME/.local/bin"; do
   [[ -d $d && ":$PATH:" != *":$d:"* ]] && PATH="$d:$PATH"
 done
+unset d
 export PATH
-
-# mise shims: runtimes (node, python, …) for non-interactive shells and agents.
-# ~/.bashrc swaps this for full `mise activate` in interactive shells.
-command -v mise >/dev/null && eval "$(mise activate bash --shims)"
 
 # Secrets (rendered by chezmoi from 1Password; absent if disabled)
 [[ -r ~/.config/bash/apikeys.sh ]] && . ~/.config/bash/apikeys.sh
