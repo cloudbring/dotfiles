@@ -5,7 +5,7 @@ Bash setup for macOS and Linux, managed by [chezmoi](https://www.chezmoi.io/).
 ## Layout
 
 ```
-.chezmoi.toml.tmpl                              # asks once: use 1Password for API keys?
+.chezmoidata.toml                               # public values (SSH signing key)
 run_onchange_before_install-packages-darwin.sh.tmpl  # Brewfile; re-runs when the list changes
 bootstrap.sh                                    # fresh machine: deps, chezmoi, chsh to bash
 dot_bash_profile.tmpl   → ~/.bash_profile       # environment: PATH, Homebrew, mise shims
@@ -15,11 +15,13 @@ dot_config/bash/
   20-tools.sh           # completions, mise, direnv, fzf, zoxide, starship
   30-aliases.sh
   40-functions.sh
-  private_apikeys.sh.tmpl                       # 1Password → ~/.config/bash/apikeys.sh (0600)
+  50-secrets.sh         # opx: run a command with secrets from 1Password
+dot_config/op/secrets.env                       # op:// references only, no values
+private_dot_ssh/config.tmpl                     # all keys via the 1Password SSH agent
 dot_config/mise/config.toml                     # global runtime versions (node LTS)
 dot_config/starship.toml                        # prompt
 dot_config/nvim/                                # LazyVim
-dot_gitconfig                                   # delta pager, zdiff3, rebase on pull
+dot_gitconfig.tmpl                              # delta, zdiff3, SSH-signed commits via 1Password
 ```
 
 ## Agent-friendly by design
@@ -74,8 +76,21 @@ chezmoi init --apply cloudbring/dotfiles
 echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells && chsh -s /opt/homebrew/bin/bash
 ```
 
-For API keys, install the 1Password CLI, run `op signin`, then
-`chezmoi init --promptBool onepassword=true --apply`.
+Then in 1Password › Settings › Developer, turn on **Use the SSH agent** and
+**Integrate with 1Password CLI**. `chezmoi apply` itself never needs 1Password.
+
+## Secrets
+
+Everything secret lives in 1Password. The repo and the disk hold only
+`op://` references and public keys.
+
+- **SSH**: keys are 1Password items served by its SSH agent. `~/.ssh` has no private keys.
+- **Git signing**: commits and tags are signed with the same SSH key via `op-ssh-sign`.
+  The public key is in `.chezmoidata.toml`.
+- **API keys**: listed as references in `~/.config/op/secrets.env`. Nothing is
+  exported into the shell, so agents and child processes never inherit them.
+  `opx CMD…` runs one command with them; `op read op://…` fetches one value.
+  Add a key: create the item in 1Password, add a `NAME=op://…` line.
 
 ## Daily use
 

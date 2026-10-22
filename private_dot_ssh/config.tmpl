@@ -1,0 +1,17 @@
+# Keys live in 1Password; its SSH agent serves them (Touch ID per app session).
+# No private keys on disk.
+{{- if eq .chezmoi.os "darwin" }}
+Include ~/.colima/ssh_config
+{{- end }}
+
+Host github.com
+    User git
+
+Host *
+{{- if eq .chezmoi.os "darwin" }}
+    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- else }}
+    IdentityAgent ~/.1password/agent.sock
+{{- end }}
+    AddKeysToAgent no
+    ServerAliveInterval 60

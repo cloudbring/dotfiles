@@ -47,7 +47,13 @@ done
 unset d
 export PATH
 
-# Secrets (rendered by chezmoi from 1Password; absent if disabled)
-[[ -r ~/.config/bash/apikeys.sh ]] && . ~/.config/bash/apikeys.sh
+# 1Password SSH agent for tools that read SSH_AUTH_SOCK (ssh itself uses ~/.ssh/config)
+{{- if eq .chezmoi.os "darwin" }}
+_op_sock="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- else }}
+_op_sock="$HOME/.1password/agent.sock"
+{{- end }}
+[[ -S $_op_sock ]] && export SSH_AUTH_SOCK=$_op_sock
+unset _op_sock
 
 [[ -r ~/.bashrc ]] && . ~/.bashrc

@@ -171,6 +171,7 @@ main() {
 	change_shell
 
 	log "Bootstrap complete! Restart your shell or run: exec bash -l"
+	log "Then: 1Password › Settings › Developer › enable 'Use the SSH agent' and 'Integrate with 1Password CLI'"
 }
 
 main "$@"

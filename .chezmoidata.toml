@@ -1,0 +1,7 @@
+# Public values used by templates. Never put secrets here; secrets live in
+# 1Password and are referenced as op://vault/item/field.
+
+[git]
+    # Public half of the "Git SSH key" item in 1Password (authentication + signing).
+    # Empty until the key exists; signing turns on automatically once set.
+    signingkey = ""
