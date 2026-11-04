@@ -16,7 +16,7 @@ dot_config/bash/
   30-aliases.sh
   40-functions.sh
   50-secrets.sh         # opx: run a command with secrets from 1Password
-dot_config/op/secrets.env                       # op:// references only, no values
+dot_config/private_op/secrets.env                     # op:// references only, no values
 private_dot_ssh/config.tmpl                     # all keys via the 1Password SSH agent
 dot_config/mise/config.toml                     # global runtime versions (node LTS)
 dot_config/starship.toml                        # prompt
