@@ -1,0 +1,48 @@
+#!/bin/sh
+# op-agent: run the 1Password CLI as the "Agents" vault service account
+# (homelab-agents). The token is set only for this one op process, so plain
+# `op` keeps using the desktop app / normal sign-in.
+#
+# Token lookup order:
+#   1. file named by $OP_AGENT_TOKEN_FILE
+#   2. macOS Keychain, service "op-agent-token", account $USER
+#   3. ~/.config/op-agent/token
+set -eu
+
+token=
+if [ -n "${OP_AGENT_TOKEN_FILE:-}" ]; then
+  if [ -r "$OP_AGENT_TOKEN_FILE" ]; then
+    token=$(cat "$OP_AGENT_TOKEN_FILE")
+  else
+    echo "op-agent: OP_AGENT_TOKEN_FILE is set but not readable: $OP_AGENT_TOKEN_FILE" >&2
+    exit 1
+  fi
+fi
+
+if [ -z "$token" ] && [ "$(uname -s)" = Darwin ] && command -v security >/dev/null 2>&1; then
+  token=$(security find-generic-password -a "${USER:-$(id -un)}" -s op-agent-token -w 2>/dev/null) || token=
+fi
+
+if [ -z "$token" ]; then
+  f="${HOME:?}/.config/op-agent/token"
+  if [ -r "$f" ]; then
+    token=$(cat "$f")
+  fi
+fi
+
+if [ -z "$token" ]; then
+  cat >&2 <<'EOF'
+op-agent: no service-account token found. Looked in:
+  1. $OP_AGENT_TOKEN_FILE
+  2. macOS Keychain (service op-agent-token, account $USER)
+  3. ~/.config/op-agent/token  (mode 0600, directory 0700)
+EOF
+  exit 1
+fi
+
+command -v op >/dev/null 2>&1 || { echo "op-agent: 1Password CLI 'op' not found on PATH" >&2; exit 127; }
+
+OP_SERVICE_ACCOUNT_TOKEN=$token
+export OP_SERVICE_ACCOUNT_TOKEN
+unset token
+exec op "$@"

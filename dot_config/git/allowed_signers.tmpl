@@ -1,3 +1,7 @@
 {{- if .git.signingkey -}}
 emmanuelm@gmail.com {{ .git.signingkey }}
 {{ end -}}
+{{- $fleetKey := joinPath .chezmoi.homeDir ".ssh/id_ed25519_fleet.pub" -}}
+{{- if stat $fleetKey -}}
+emmanuelm@gmail.com {{ include $fleetKey | trim | splitList " " | initial | join " " }}
+{{ end -}}

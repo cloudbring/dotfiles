@@ -1,7 +1,16 @@
 [user]
 	email = emmanuelm@gmail.com
 	name = Emmanuel Mwangi
-{{- if .git.signingkey }}
+{{- /* Fleet machines (cloudbring/fleet) sign with their on-disk key so
+       unattended agents never wait for 1Password; others use 1Password. */}}
+{{- $fleetKey := joinPath .chezmoi.homeDir ".ssh/id_ed25519_fleet.pub" }}
+{{- if stat $fleetKey }}
+	signingkey = {{ trimSuffix ".pub" $fleetKey }}
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	program = ssh-keygen
+{{- else if .git.signingkey }}
 	signingkey = {{ .git.signingkey }}
 [gpg]
 	format = ssh
@@ -11,6 +20,8 @@
 {{- else }}
 	program = /opt/1Password/op-ssh-sign
 {{- end }}
+{{- end }}
+{{- if or (stat $fleetKey) .git.signingkey }}
 	allowedSignersFile = ~/.config/git/allowed_signers
 [commit]
 	gpgsign = true
@@ -19,6 +30,15 @@
 {{- end }}
 [github]
 	user = cloudbring
+{{- with lookPath "gh" }}
+# HTTPS remotes authenticate through the GitHub CLI's stored login.
+[credential "https://github.com"]
+	helper =
+	helper = !{{ . }} auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !{{ . }} auth git-credential
+{{- end }}
 [init]
 	defaultBranch = master
 [core]

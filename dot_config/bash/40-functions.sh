@@ -14,3 +14,8 @@ pomo() {
 
 export NEOVIDE_FRAME=transparent
 export NEOVIDE_MULTIGRID=true
+
+# Pi coding agent runs faster under Bun's runtime than Node's.
+if hash pi bun 2>/dev/null; then
+  pi() { bun --bun "$(type -P pi)" "$@"; }
+fi

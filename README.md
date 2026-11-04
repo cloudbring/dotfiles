@@ -21,8 +21,30 @@ private_dot_ssh/config.tmpl                     # all keys via the 1Password SSH
 dot_config/mise/config.toml                     # global runtime versions (node LTS)
 dot_config/starship.toml                        # prompt
 dot_config/nvim/                                # LazyVim
+dot_config/{git/ignore,jj,zed,opencode}/        # global gitignore, jj, Zed, opencode rules
+dot_tmux.conf                                   # plugins via tpm (clone it once, see below)
+bin/                    → ~/bin                 # op-agent, claude-proxy
 dot_gitconfig.tmpl                              # delta, zdiff3, SSH-signed commits via 1Password
 ```
+
+## Machine-local files (never committed)
+
+The repo is public. Anything that names internal hosts or holds a secret lives
+in files chezmoi doesn't manage:
+
+| File | For |
+|---|---|
+| `~/.bash_profile.local` | machine-only environment, sourced by every login shell |
+| `~/.config/bash/90-local.sh` | machine-only interactive setup (any `NN-*.sh` there is loaded) |
+| `~/.ssh/config.local` | home-lab and work hosts |
+| `~/.ssh/fleet.conf` | written by cloudbring/fleet; see below |
+
+## Fleet machines
+
+On machines enrolled by cloudbring/fleet (`~/.ssh/id_ed25519_fleet.pub` exists),
+GitHub SSH and commit signing use that on-disk key instead of 1Password, so
+unattended agents never wait for Touch ID. `fleet.conf` is included before the
+1Password settings in `~/.ssh/config`, and `.gitconfig` signs with the fleet key.
 
 ## Agent-friendly by design
 
@@ -75,6 +97,8 @@ brew install chezmoi
 chezmoi init --apply cloudbring/dotfiles
 echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells && chsh -s /opt/homebrew/bin/bash
 ```
+
+For tmux plugins: `git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm`, then `prefix + I` inside tmux.
 
 Then in 1Password › Settings › Developer, turn on **Use the SSH agent** and
 **Integrate with 1Password CLI**. `chezmoi apply` itself never needs 1Password.
