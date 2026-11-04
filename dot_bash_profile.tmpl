@@ -40,7 +40,12 @@ export LESS='-R -F -i'   # keep colors, quit if one screen, smart-case search
 # shell, interactive or not, with no per-prompt hook.
 export GOPATH="$HOME/go"
 export BUN_INSTALL="$HOME/.bun"
-for d in "$GOPATH/bin" "$HOME/.luarocks/bin" "$PNPM_HOME" "$BUN_INSTALL/bin" \
+# Tool installers that edit shell rc files (cargo, Docker, turso, …) are listed
+# here instead; each entry is skipped when its directory doesn't exist.
+for d in "$HOME/.docker/bin" "$HOME/.sdkman/candidates/java/current/bin" "$HOME/.cargo/bin" \
+         "$HOME/.turso" "$HOME/.antigravity/antigravity/bin" "$HOME/.antigravity-ide/antigravity-ide/bin" \
+         "$HOME/.minimax-code/bin" "$HOME/.mavis/bin" "$HOME/.omlx/bin" \
+         "$GOPATH/bin" "$HOME/.luarocks/bin" "$PNPM_HOME" "$BUN_INSTALL/bin" \
          "${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims" "$HOME/bin" "$HOME/.local/bin"; do
   [[ -d $d && ":$PATH:" != *":$d:"* ]] && PATH="$d:$PATH"
 done
@@ -55,5 +60,9 @@ _op_sock="$HOME/.1password/agent.sock"
 {{- end }}
 [[ -S $_op_sock ]] && export SSH_AUTH_SOCK=$_op_sock
 unset _op_sock
+
+# Machine-specific environment that must not be public (internal hosts, local
+# experiments). Not managed by chezmoi; never commit it.
+[[ -r ~/.bash_profile.local ]] && . ~/.bash_profile.local
 
 [[ -r ~/.bashrc ]] && . ~/.bashrc

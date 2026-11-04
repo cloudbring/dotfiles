@@ -40,16 +40,6 @@ return {
   },
 
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    opts = {
-      suggestion = { enabled = true, auto_trigger = true, keymap = { accept = "<Tab>" } },
-      panel = { enabled = false },
-    },
-  },
-
-  {
     "jackMort/ChatGPT.nvim",
     dependencies = {
       "MunifTanjim/nui.nvim",

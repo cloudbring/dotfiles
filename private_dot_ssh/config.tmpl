@@ -1,5 +1,14 @@
 # Keys live in 1Password; its SSH agent serves them (Touch ID per app session).
-# No private keys on disk.
+#
+# ssh uses the first value it finds for each option, so the local files below
+# win over everything in this file. Neither is managed by chezmoi or committed:
+#   fleet.conf    written by cloudbring/fleet on unattended machines; pins
+#                 github.com and fleet hosts to an on-disk key with no agent,
+#                 so agents never wait for a fingerprint.
+#   config.local  home-lab and work hosts (internal names and addresses).
+# A missing Include file is ignored.
+Include ~/.ssh/fleet.conf
+Include ~/.ssh/config.local
 {{- if eq .chezmoi.os "darwin" }}
 Include ~/.colima/ssh_config
 {{- end }}

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# claude-proxy: run Claude Code against the local CLIProxyAPI (http://127.0.0.1:8317)
+# for non-Anthropic models. Native `claude` behavior is untouched.
+set -euo pipefail
+
+SECRETS_FILE="$HOME/dev/setup-cli-proxy-api/secrets/cliproxyapi-local-keys.txt"
+
+if [[ ! -r "$SECRETS_FILE" ]]; then
+  echo "claude-proxy: ERROR: secrets file not found or unreadable: $SECRETS_FILE" >&2
+  exit 1
+fi
+
+# The API key is the line following the "API key (for Claude Code / clients):" label.
+API_KEY="$(grep -A1 'API key (for Claude Code / clients):' "$SECRETS_FILE" | tail -n 1 | tr -d '[:space:]')"
+
+if [[ -z "$API_KEY" ]]; then
+  echo "claude-proxy: ERROR: could not extract API key from $SECRETS_FILE" >&2
+  exit 1
+fi
+
+export ANTHROPIC_BASE_URL="http://127.0.0.1:8317"
+export ANTHROPIC_AUTH_TOKEN="$API_KEY"
+export ANTHROPIC_API_KEY=""
+export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
+
+exec "$HOME/.local/bin/claude" "$@"

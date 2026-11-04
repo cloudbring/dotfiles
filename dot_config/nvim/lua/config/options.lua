@@ -24,8 +24,11 @@ vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 vim.opt.winwidth = 80
-vim.opt.winminwidth = 80
+vim.opt.winminwidth = 10
 
-vim.g.python3_host_prog = "/Users/e/.pyenv/versions/3.11.4/envs/neovim/bin/python3"
+local neovim_python = vim.fn.expand("~/.pyenv/versions/3.11.4/envs/neovim/bin/python3")
+if vim.fn.executable(neovim_python) == 1 then
+  vim.g.python3_host_prog = neovim_python
+end
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
