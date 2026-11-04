@@ -1,0 +1,11 @@
+{{- if stat "/usr/share/omarchy" -}}
+#!/bin/bash
+# Apps added on top of a stock Omarchy install. Re-runs when this list changes.
+set -e
+
+omarchy-pkg-add tailscale visual-studio-code-bin t3code-bin voxtype-bin fwupd
+
+sudo systemctl enable --now tailscaled
+systemctl --user daemon-reload
+systemctl --user enable --now voxtype.service
+{{- end }}

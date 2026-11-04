@@ -27,6 +27,23 @@ bin/                    → ~/bin                 # op-agent, claude-proxy
 dot_gitconfig.tmpl                              # delta, zdiff3, SSH-signed commits via 1Password
 ```
 
+## Omarchy
+
+On machines running [Omarchy](https://omarchy.org) (`/usr/share/omarchy` exists),
+chezmoi also applies the few settings changed from Omarchy's defaults, and
+`run_onchange_after_install-packages-omarchy.sh` installs the extra apps
+(Tailscale, VS Code, T3 Code, Voxtype, fwupd) and enables their services.
+Everything else (theme, web apps, LazyVim base) is Omarchy's stock setup.
+
+| File | Change from Omarchy's default |
+|---|---|
+| `dot_config/hypr/input.lua` | natural touchpad scrolling |
+| `dot_config/omarchy/shell.json` | Tailscale indicator in the bar |
+| `dot_config/omarchy/defaults/agent` | default agent: `codex` |
+| `dot_config/voxtype/config.toml` | whisper, local, push-to-talk on Right Alt |
+| `dot_config/systemd/user/voxtype.service` | runs the Voxtype daemon with the session |
+| `dot_config/chromium-flags.conf` | `WebRtcPipeWireCamera`, so Chromium sees libcamera cameras |
+
 ## Machine-local files (never committed)
 
 The repo is public. Anything that names internal hosts or holds a secret lives
