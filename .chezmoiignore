@@ -4,3 +4,11 @@ changelog/
 {{- if ne .chezmoi.os "darwin" }}
 .hushlogin
 {{- end }}
+{{- if not (stat "/usr/share/omarchy") }}
+# Omarchy (Hyprland) desktop settings; only on machines running Omarchy
+.config/hypr
+.config/omarchy
+.config/voxtype
+.config/systemd/user/voxtype.service
+.config/chromium-flags.conf
+{{- end }}
